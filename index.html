@@ -169,11 +169,11 @@ sigma = [15, 10, 16, 11, 9, 11, 10, 18]
 end
 
 model_esc = eight_schools_centered(J, y, sigma)
-sample(model_esnc, NUTS(), 2000)
+sample(model_esc, NUTS(), 2000)
 
 using MicroCanonicalHMC
 mchmc_sampler = externalsampler(MCHMC(10000, 0.001))
-sample(model_esnc, mchmc_sampler, 2000)</pre></code>
+sample(model_esc, mchmc_sampler, 2000)</pre></code>
 
         <h2 id="ess">ess.jl</h2>
         <a href="#toc">(Back to top)</a>
