@@ -1,0 +1,6 @@
+[deps]
+AbstractMCMC = "80f14c24-f653-4e6a-9b94-39d6b0f70001"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+MicroCanonicalHMC = "234d2aa0-2291-45f7-9047-6fa6f316b0a8"
+PosteriorDB = "1c4bc282-d2f5-44f9-b6d1-8c4424a23ad4"
+Turing = "fce5fe82-541a-59a6-adf8-730c64b5f9a0"

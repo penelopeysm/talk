@@ -1,0 +1,16 @@
+[project]
+name = "pymc-demo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "arviz>=0.21.0",
+    "blackjax>=1.2.5",
+    "jax>=0.6.0",
+    "numba>=0.61.2",
+    "numpy>=2.2.5",
+    "numpyro>=0.18.0",
+    "nutpie>=0.14.3",
+    "pymc>=5.22.0",
+]
