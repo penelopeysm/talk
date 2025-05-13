@@ -1,4 +1,4 @@
-using AbstractGPs, LogExpFunctions, Turing
+using AbstractGPs, LogExpFunctions, Turing, SliceSampling
 
 N = 10
 xs = ColVecs(rand(2, N))
@@ -16,6 +16,4 @@ model = dense_gp(xs) | (; y = ys)
 
 sample(model, NUTS(), 1000)
 
-sample(model, Gibbs(:preds => ESS(),
-             (:var, :scale) => externalsampler(HitAndRun(SliceSteppingOut(4.0)))),
-       1000)
+sample(model, Gibbs(:preds => ESS(), (:var, :scale) => externalsampler(HitAndRun(SliceSteppingOut(4.0)))), 1000)
