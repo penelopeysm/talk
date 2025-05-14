@@ -20,7 +20,6 @@
         </ul>
         <ul>
             <li><a href="#mchmc"><code>mchmc.jl</code></a></li>
-            <li><a href="#ess"><code>ess.jl</code></a></li>
             <li><a href="#submodel"><code>submodel.jl</code></a></li>
             <li><a href="#ad"><code>ad.jl</code></a></li>
         </ul>
@@ -106,29 +105,6 @@ if __name__ == "__main__":
     main()</code></pre>
 
 
-        <h2 id="escjulia">eight_schools_centered.jl</h2>
-        <a href="#toc">(Back to top)</a>
-        <p>Launch Julia with <code>julia --project=.</code> and then in the Julia REPL, run <code>]add Turing</code>. (The <code>]</code> enters the package-manager mode, and <code>add Turing</code> installs Turing.jl.) Once that is done, press Backspace to re-enter the REPL mode, which has a prompt that looks like <code>julia&gt;</code>. You can then run the commands in this file.</p>
-        <pre><code class="language-julia">using Turing
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function eight_schools_centered(J, y, sigma)
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    theta = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta[i] ~ Normal(mu, tau)
-        y[i] ~ Normal(theta[i], sigma[i])
-    end
-end
-
-model_esc = eight_schools_centered(J, y, sigma)
-
-chain = sample(model_esc, NUTS(), 1000; num_warmup=10000, thinning=10)</pre></code>
-
         <h2 id="escpymc">eight_schools_centered_pymc.py</h2>
         <a href="#toc">(Back to top)</a>
         <p>You will need a virtual environment with the <code>pymc</code> package installed.</p>
@@ -157,9 +133,34 @@ def main():
 if __name__ == "__main__":
     main()</code></pre>
 
+        <h2 id="escjulia">eight_schools_centered.jl</h2>
+        <a href="#toc">(Back to top)</a>
+        <p>Launch Julia with <code>julia --project=.</code> and then in the Julia REPL, enter <code>]</code>. This will cause the REPL to enter package-manager mode, indicated by a prompt of <code>pkg&gt;</code>. Then type <code>add Turing</code> to install the Turing.jl package.</p>
+        <p>Once that is done, press Backspace to re-enter the REPL mode, which has a prompt that looks like <code>julia&gt;</code>. You can then run the commands in this file.</p>
+        <pre><code class="language-julia">using Turing
+
+J = 8
+y = [28, 8, -3, 7, -1, 1, 18, 12]
+sigma = [15, 10, 16, 11, 9, 11, 10, 18]
+
+@model function eight_schools_centered(J, y, sigma)
+    mu ~ Normal(0, 5)
+    tau ~ truncated(Cauchy(0, 5); lower=0)
+    theta = Vector{Float64}(undef, J)
+    for i in 1:J
+        theta[i] ~ Normal(mu, tau)
+        y[i] ~ Normal(theta[i], sigma[i])
+    end
+end
+
+model_esc = eight_schools_centered(J, y, sigma)
+
+chain = sample(model_esc, NUTS(), 1000; num_warmup=10000, thinning=10)</pre></code>
+
         <h2 id="mchmc">mchmc.jl</h2>
         <a href="#toc">(Back to top)</a>
-        <p>Go back to the same directory that you ran the Julia code in. If you run <code>julia --project=.</code> it will activate the same environment as previously. You can then run all of the code below in the REPL.</p>
+        <p>Go back to the same directory that you ran the Julia code in. If you run <code>julia --project=.</code> it will activate the same environment as previously.</p>
+        <p>As before, you will need to install a dependency: press <code>]</code>, then enter <code>add MicroCanonicalHMC</code>, then press Backspace. You can then run all of the code below in the REPL.</p>
 
         <pre><code class="language-julia">using Turing, MicroCanonicalHMC
 
@@ -181,32 +182,8 @@ model_esc = eight_schools_centered(J, y, sigma)
 sample(model_esc, NUTS(), 5000)
 
 using MicroCanonicalHMC
-mchmc_sampler = externalsampler(MCHMC(10000, 0.001))
+mchmc_sampler = externalsampler(MCHMC(2000, 0.001))
 sample(model_esc, mchmc_sampler, 5000)</pre></code>
-
-        <h2 id="ess">ess.jl</h2>
-        <a href="#toc">(Back to top)</a>
-        <p>You will need a few more dependencies: <code>]add AbstractGPs LogExpFunctions SliceSampling</code></p>
-
-        <pre><code class="language-julia">using AbstractGPs, LogExpFunctions, Turing, SliceSampling
-
-N = 10
-xs = ColVecs(rand(2, N))
-ys = mean.(xs) .< rand(length(xs))
-
-@model function gp(points)
-    var ~ Exponential(1)
-    scale ~ Exponential(1)
-    f = GP(var * with_lengthscale(SEKernel(), scale))
-    preds ~ f(points, 1e-8)
-    y ~ product_distribution(BernoulliLogit.(preds))
-end
-
-model = dense_gp(xs) | (; y = ys)
-
-sample(model, NUTS(), 1000)
-
-sample(model, Gibbs(:preds => ESS(), (:var, :scale) => externalsampler(HitAndRun(SliceSteppingOut(4.0)))), 1000)</code></pre>
 
 
         <h2 id="submodel">submodel.jl</h2>
@@ -258,6 +235,10 @@ chain_esnc = sample(model_esnc, NUTS(), 2000)</code></pre>
 
         <pre><code class="language-julia">using Turing, ADTypes
 import Enzyme: set_runtime_activity, Reverse
+
+J = 8
+y = [28, 8, -3, 7, -1, 1, 18, 12]
+sigma = [15, 10, 16, 11, 9, 11, 10, 18]
 
 @model function eight_schools_noncentered(J, y, sigma)
     mu ~ Normal(0, 5)
