@@ -127,7 +127,7 @@ end
 
 model_esc = eight_schools_centered(J, y, sigma)
 
-chain = sample(model_esc, NUTS(), MCMCThreads(), 1000, 10; num_warmup=10_000, thinning=10)</pre></code>
+chain = sample(model_esc, NUTS(), 1000; num_warmup=10000, thinning=10)</pre></code>
 
         <h2 id="escpymc">eight_schools_centered_pymc.py</h2>
         <a href="#toc">(Back to top)</a>
@@ -178,11 +178,11 @@ sigma = [15, 10, 16, 11, 9, 11, 10, 18]
 end
 
 model_esc = eight_schools_centered(J, y, sigma)
-sample(model_esc, NUTS(), 2000)
+sample(model_esc, NUTS(), 5000)
 
 using MicroCanonicalHMC
 mchmc_sampler = externalsampler(MCHMC(10000, 0.001))
-sample(model_esc, mchmc_sampler, 2000)</pre></code>
+sample(model_esc, mchmc_sampler, 5000)</pre></code>
 
         <h2 id="ess">ess.jl</h2>
         <a href="#toc">(Back to top)</a>
@@ -218,30 +218,33 @@ J = 8
 y = [28, 8, -3, 7, -1, 1, 18, 12]
 sigma = [15, 10, 16, 11, 9, 11, 10, 18]
 
-@model function eight_schools_priors()
+@model function priors()
     mu ~ Normal(0, 5)
     tau ~ truncated(Cauchy(0, 5); lower=0)
     return (mu=mu, tau=tau)
 end
 
 @model function eight_schools_centered(J, y, sigma)
-    priors ~ to_submodel(eight_schools_priors())
+    p ~ to_submodel(priors())
     theta = Vector{Float64}(undef, J)
     for i in 1:J
-        theta[i] ~ Normal(priors.mu, priors.tau)
+        theta[i] ~ Normal(p.mu, p.tau)
         y[i] ~ Normal(theta[i], sigma[i])
     end
 end
 
 @model function eight_schools_noncentered(J, y, sigma)
-    priors ~ to_submodel(eight_schools_priors())
+    p ~ to_submodel(priors())
     theta_trans = Vector{Float64}(undef, J)
     for i in 1:J
         theta_trans[i] ~ Normal(0, 1)
-        theta = theta_trans[i] * priors.tau + priors.mu
+        theta = theta_trans[i] * p.tau + p.mu
         y[i] ~ Normal(theta, sigma[i])
     end
 end
+
+model_priors = priors()
+chain_priors = sample(model_priors, NUTS(), 2000)
 
 model_esc = eight_schools_centered(J, y, sigma)
 chain_esc = sample(model_esc, NUTS(), 2000)
