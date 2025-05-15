@@ -19,7 +19,7 @@
             <li><a href="#escjulia"><code>eight_schools_centered.jl</code></a></li>
         </ul>
         <ul>
-            <li><a href="#mchmc"><code>mchmc.jl</code></a></li>
+            <li><a href="#sampler"><code>sampler.jl</code></a></li>
             <li><a href="#submodel"><code>submodel.jl</code></a></li>
             <li><a href="#ad"><code>ad.jl</code></a></li>
         </ul>
@@ -157,7 +157,7 @@ model_esc = eight_schools_centered(J, y, sigma)
 
 chain = sample(model_esc, NUTS(), 1000; num_warmup=10000, thinning=10)</pre></code>
 
-        <h2 id="mchmc">mchmc.jl</h2>
+        <h2 id="sampler">sampler.jl</h2>
         <a href="#toc">(Back to top)</a>
         <p>Go back to the same directory that you ran the Julia code in. If you run <code>julia --project=.</code> it will activate the same environment as previously.</p>
         <p>As before, you will need to install a dependency: press <code>]</code>, then enter <code>add MicroCanonicalHMC</code>, then press Backspace. You can then run all of the code below in the REPL.</p>
