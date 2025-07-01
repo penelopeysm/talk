@@ -4,6 +4,7 @@
 	import python from 'svelte-highlight/languages/python';
 	import julia from 'svelte-highlight/languages/julia';
 	import atomOneLight from 'svelte-highlight/styles/atom-one-light';
+    import { base } from '$app/paths';
 
 	import CodeExample from '$lib/CodeExample.svelte';
 
@@ -199,7 +200,7 @@ chain = sample(model, NUTS(; adtype=enzyme_reverse), 2000)
 	{@html atomOneLight}
 </svelte:head>
 
-<p><a href="../">Back to list of talks</a></p>
+<p><a href="{base}">Back to list of talks</a></p>
 
 <h1 id="toc">Table of contents - code snippets</h1>
 <ul>
