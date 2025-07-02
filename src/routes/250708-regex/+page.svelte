@@ -70,58 +70,48 @@ for s in ["abc", "abcd", "ac"]:
 `;
 
 	const dfa_py = String.raw`
-from __future__ import annotations
-
 class MatchSuccess(Exception):
     pass
 
 class MatchFailure(Exception):
     pass
 
-class SuccessState:
-    def parse(self, input):
+STATES = {}
+
+def parse(state: str, input: str):
+    if state == "SUCCESS":
         raise MatchSuccess()
 
-class EndState:
-    def parse(self, input):
+    if state == "END":
         if input == "":
-            return SuccessState().parse(input)
+            parse("SUCCESS", "")
         else:
             raise MatchFailure()
 
-class State:
-    transition: tuple[str, Union[EndState,State]]
+    if state not in STATES:
+        raise RuntimeError(f"Oops! You reached an invalid state: {state}.")
 
-    def __eq__(self, other):
-        return self.transition == other.transition
+    expected, next_state = STATES[state]
+    if input.startswith(expected):
+        remaining_input = input.removeprefix(expected)
+        return parse(next_state, remaining_input)
+    else:
+        raise MatchFailure()
 
-    def __init__(self, transition):
-        self.transition = transition
-
-    def parse(self, input: str) -> tuple[State, str]:
-        expected, next_state = self.transition
-
-        if input.startswith(expected):
-            remaining_input = input.removeprefix(expected)
-            return next_state.parse(remaining_input)
-        else:
-            raise MatchFailure()
-
-def match_regex(start_state: State, input_string: str) -> bool:
+def match_regex(start_state: str, input_string: str) -> bool:
     try:
-        start_state.parse(input_string)
+        parse(start_state, input_string)
     except MatchSuccess:
         return True
     except MatchFailure:
         return False
 
-R = State(("c", EndState()))
-Q = State(("b", R))
-P = State(("a", Q))
-
 print("----- \"abc\" ------")
+STATES["P"] = ("a", "Q")
+STATES["Q"] = ("b", "R")
+STATES["R"] = ("c", "END")
 for s in ["abc", "abcd", "ac"]:
-    print(s, match_regex(P, s))
+    print(s, match_regex("P", s))
 `;
 
 	const nfa_backtrack_py = String.raw`

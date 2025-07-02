@@ -10,7 +10,7 @@ class MatchFailure(Exception):
 
 STATES = dict()
 
-def parse(state: str, input: str) -> tuple[str, str]:
+def parse(state: str, input: str):
     global nchecks
 
     if state == "SUCCESS":
