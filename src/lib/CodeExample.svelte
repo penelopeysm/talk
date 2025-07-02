@@ -16,4 +16,4 @@
 
 {@render description()}
 
-<Highlight {language} {code} />
+<Highlight {language} code={code.trim()} />
