@@ -6,25 +6,6 @@
 	import diff from 'svelte-highlight/languages/diff';
 	import python from 'svelte-highlight/languages/python';
 
-	const cpython_patch = `
-diff --git a/Lib/re/_compiler.py b/Lib/re/_compiler.py
-index 1b1aaa7714b..b0d5578eae1 100644
---- a/Lib/re/_compiler.py
-+++ b/Lib/re/_compiler.py
-@@ -36,7 +36,10 @@ def _combine_flags(flags, add_flags, del_flags,
- 
- def _compile(code, pattern, flags):
-     # internal: compile a (sub)pattern
--    emit = code.append
-+    print("calling _compile!")
-+    def emit(x):
-+        print("emit:", x)
-+        code.append(x)
-     _len = len
-     LITERAL_CODES = _LITERAL_CODES
-     REPEATING_CODES = _REPEATING_CODES
-`;
-
 	const naive_py = String.raw`
 """
 Verify if a string matches the regular expression 'abc'.
@@ -219,12 +200,15 @@ class MatchFailure(Exception):
     pass
 
 STATES = {}
+nchecks = 0
 
 def get_epsilon_closure(state: str):
+    global nchecks
     if state == "END":
         return set(["END"])
     ts = set([state])
     for expected, next_state in STATES[state]:
+        nchecks += 1
         if expected == "":
             ts.add(next_state)
             ts.update(get_epsilon_closure(next_state))
@@ -299,12 +283,6 @@ for i in range(1, 41):
 `;
 
 	const CODE_SNIPPETS = {
-		cpython_patch: {
-			anchor: 'cpython-patch',
-			language: diff,
-			filename: 'cpython_regex.patch',
-			code: cpython_patch
-		},
 		naive_py: {
 			anchor: 'naive-py',
 			language: python,
@@ -347,7 +325,6 @@ for i in range(1, 41):
 	{@render list_item(CODE_SNIPPETS.naive_py)}
 	{@render list_item(CODE_SNIPPETS.fa_py)}
 	{@render list_item(CODE_SNIPPETS.nfa_backtrack_py)}
-	{@render list_item(CODE_SNIPPETS.cpython_patch)}
 	{@render list_item(CODE_SNIPPETS.nfa_linear_py)}
 </ul>
 
@@ -364,11 +341,6 @@ for i in range(1, 41):
 		<a href="https://stackstatus.tumblr.com/post/147710624694/outage-postmortem-july-20-2016"
 			>Stack Overflow</a
 		> outages caused by rogue regexes
-	</li>
-	<li>
-		<a href="https://github.com/python/cpython/blob/3.13/Lib/re/_compiler.py"
-			>CPython's regex compiler</a
-		>
 	</li>
 	<li>
 		<a href="https://swtch.com/~rsc/regexp/">Russ Cox's articles on regular expressions</a>: in
@@ -435,31 +407,6 @@ for i in range(1, 41):
 	filename={CODE_SNIPPETS.nfa_backtrack_py.filename}
 	code={CODE_SNIPPETS.nfa_backtrack_py.code}
 	description={nfa_backtrack_desc}
-/>
-
-{#snippet cpython_patch_desc()}
-	<p>
-		Extra printing statements which I added to CPython to illustrate the regex compilation process.
-		This diff was applied to the <code>3.13</code>
-		branch of <a href="https://github.com/python/cpython">CPython</a>.
-	</p>
-	<p>
-		To replicate this, you can clone the repo, run <code
-			>git checkout da2c4ef7eb4; git apply cpython_regex.patch</code
-		>, and then compile it with <code>./configure; make</code>. That will create a patched Python
-		interpreter which you can run with <code>./python.exe</code>.
-	</p>
-	<p>
-		Then, running <code>import re; re.compile("a?a?a?aaa")</code> will print output that is not too
-		dissimilar to the <code>STATES</code> dictionary in the previous snippet.
-	</p>
-{/snippet}
-<CodeExample
-	anchorname={CODE_SNIPPETS.cpython_patch.anchor}
-	language={CODE_SNIPPETS.cpython_patch.language}
-	filename={CODE_SNIPPETS.cpython_patch.filename}
-	code={CODE_SNIPPETS.cpython_patch.code}
-	description={cpython_patch_desc}
 />
 
 {#snippet nfa_linear_desc()}

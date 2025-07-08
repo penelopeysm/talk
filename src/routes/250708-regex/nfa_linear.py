@@ -5,12 +5,15 @@ class MatchFailure(Exception):
     pass
 
 STATES = {}
+nchecks = 0
 
 def get_epsilon_closure(state: str):
+    global nchecks
     if state == "END":
         return set(["END"])
     ts = set([state])
     for expected, next_state in STATES[state]:
+        nchecks += 1
         if expected == "":
             ts.add(next_state)
             ts.update(get_epsilon_closure(next_state))
