@@ -341,7 +341,7 @@ for i in range(1, 41):
 <h1 id="toc">Table of contents - code snippets</h1>
 
 {#snippet list_item(code)}
-	<li><a href="#{code.anchor}">{code.filename}</a></li>
+	<li><a href="#{code.anchor}"><code>{code.filename}</code></a></li>
 {/snippet}
 <ul>
 	{@render list_item(CODE_SNIPPETS.naive_py)}
