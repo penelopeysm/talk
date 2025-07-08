@@ -7,12 +7,9 @@ class MatchFailure(Exception):
 STATES = {}
 
 def parse(state: str, input: str):
-    if state == "SUCCESS":
-        raise MatchSuccess()
-
     if state == "END":
         if input == "":
-            parse("SUCCESS", "")
+            raise MatchSuccess()
         else:
             raise MatchFailure()
 

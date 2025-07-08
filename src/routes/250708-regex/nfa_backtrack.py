@@ -1,7 +1,3 @@
-from __future__ import annotations
-
-nchecks = 0
-
 class MatchSuccess(Exception):
     pass
 
@@ -9,17 +5,15 @@ class MatchFailure(Exception):
     pass
 
 STATES = dict()
+nchecks = 0
 
 def parse(state: str, input: str):
     global nchecks
 
-    if state == "SUCCESS":
-        raise MatchSuccess()
-
     if state == "END":
         nchecks += 1
         if input == "":
-            parse("SUCCESS", "")
+            raise MatchSuccess()
         else:
             raise MatchFailure()
 

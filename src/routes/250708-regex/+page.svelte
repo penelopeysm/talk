@@ -69,7 +69,7 @@ for s in ["abc", "abcd", "ac"]:
     print(s, parse_abQc(s))
 `;
 
-	const dfa_py = String.raw`
+	const fa_py = String.raw`
 class MatchSuccess(Exception):
     pass
 
@@ -79,12 +79,9 @@ class MatchFailure(Exception):
 STATES = {}
 
 def parse(state: str, input: str):
-    if state == "SUCCESS":
-        raise MatchSuccess()
-
     if state == "END":
         if input == "":
-            parse("SUCCESS", "")
+            raise MatchSuccess()
         else:
             raise MatchFailure()
 
@@ -115,10 +112,6 @@ for s in ["abc", "abcd", "ac"]:
 `;
 
 	const nfa_backtrack_py = String.raw`
-from __future__ import annotations
-
-nchecks = 0
-
 class MatchSuccess(Exception):
     pass
 
@@ -126,17 +119,15 @@ class MatchFailure(Exception):
     pass
 
 STATES = dict()
+nchecks = 0
 
-def parse(state: str, input: str) -> tuple[str, str]:
+def parse(state: str, input: str):
     global nchecks
-
-    if state == "SUCCESS":
-        raise MatchSuccess()
 
     if state == "END":
         nchecks += 1
         if input == "":
-            parse("SUCCESS", "")
+            raise MatchSuccess()
         else:
             raise MatchFailure()
 
@@ -220,103 +211,91 @@ for n in range(1, 20):
     print(f"n={n}:", test_string, match_regex(f"Aq{n}_0", test_string), "checks:", nchecks)
 `;
 
-	const nfa_thompson_py = String.raw`
-from __future__ import annotations
-
-nchecks = 0
-
+	const nfa_linear_py = String.raw`
 class MatchSuccess(Exception):
     pass
 
-STATES = dict()
+class MatchFailure(Exception):
+    pass
 
-def get_all_empty_transitions(state: str) -> set[str]:
-    if state == "SUCCESS" or state == "END":
-        return set()
-    else:
-        next_states = set(next_state for (expected, next_state) in STATES[state] if expected == "")
-        empty_transitions = set()
-        for t in next_states:
-            empty_transitions.update(get_all_empty_transitions(t))
-        empty_transitions.add(state)
-        return empty_transitions
+STATES = {}
 
-def progress(current_states: set[str], input: str) -> set[str]:
+def get_epsilon_closure(state: str):
+    if state == "END":
+        return set(["END"])
+    ts = set([state])
+    for expected, next_state in STATES[state]:
+        if expected == "":
+            ts.add(next_state)
+            ts.update(get_epsilon_closure(next_state))
+    return ts
+
+def progress_state(in_states: set[str], input: str):
     global nchecks
+    
+    nchecks += 1
+    if input == "":
+        if any(s == "END" for s in in_states):
+            raise MatchSuccess()
+        else:
+            raise MatchFailure()
 
-    possible_outcomes = set()
+    out_states = set()
 
-    for state in current_states:
-        if state == "SUCCESS":
-            possible_outcomes.add("SUCCESS")
-            continue
-
+    for state in in_states:
         if state == "END":
-            nchecks += 1
-            if input == "":
-                possible_outcomes.add("SUCCESS")
+            out_states.add("END")
             continue
 
         if state not in STATES:
-            raise RuntimeError(f"Oops! You reached an invalid state: {state}.")
+            raise ValueError(f"oops: {state}")
 
-        this_state_outcomes = set()
         for expected, next_state in STATES[state]:
             nchecks += 1
-            if input.startswith(expected):
-                this_state_outcomes.add(next_state)
-                this_state_outcomes.update(get_all_empty_transitions(next_state))
+            if input[0] == expected:
+                out_states.add(next_state)
+                out_states.update(get_epsilon_closure(next_state))
 
-        possible_outcomes.update(this_state_outcomes)
+    return progress_state(out_states, input[1:])
 
-    if any(state == "SUCCESS" for state in possible_outcomes):
-        raise MatchSuccess()
-
-    return possible_outcomes
-
-def match_regex(start_state: str, input: str) -> bool:
+def match(start_state: str, input: str):
     global nchecks
     nchecks = 0
-    states = get_all_empty_transitions(start_state)
     try:
-        while len(states) > 0:
-            states = progress(states, input)
-            input = input[1:]
-        return False
+        progress_state(get_epsilon_closure(start_state), input)
     except MatchSuccess:
+        print(f"{input} => True with {nchecks} checks")
         return True
+    except MatchFailure:
+        print(f"{input} => False with {nchecks} checks")
+        return False
 
-print("----- \"abc\" ------")
-STATES["P"] = [("a", "Q")]
-STATES["Q"] = [("b", "R")]
-STATES["R"] = [("c", "END")]
-for s in ["abc", "abcd", "ac"]:
-    print(s, match_regex("P", s), "checks:", nchecks)
-
-print("----- \"ab?c\" ------")
-STATES["P2"] = [("a", "Q2")]
-STATES["Q2"] = [("b", "R2"), ("", "R2")]
-STATES["R2"] = [("c", "END")]
-for s in ["abc", "abcd", "ac"]:
-    print(s, match_regex("P2", s), "checks:", nchecks)
-
-print("----- \"ab+c\" ------")
-STATES["P3"] = [("a", "Q3")]
-STATES["Q3"] = [("b", "R3")]
-STATES["R3"] = [("c", "END"), ("", "Q3")]
-for s in ["ac", "abc", "abbbbbbc"]:
-    print(s, match_regex("P3", s), "checks:", nchecks)
-
-print("----- \"(a?)_n(a)_n\" ------")
-for n in range(1, 20):
+def create_states(n):
+    base = f"A{n}"
+    states = {}
     for i in range(n):
-        STATES[f"Aq{n}_{i}"] = [("a", f"Aq{n}_{i+1}"), ("", f"Aq{n}_{i+1}")]
+        states[f"{base}_{i}"] = [
+            ("a", f"{base}_{i+1}"),
+            ("", f"{base}_{i+1}"),
+        ]
         if i == n - 1:
-            STATES[f"Aq{n}_{n+i}"] = [("a", "END")]
+            states[f"{base}_{i+n}"] = [
+                ("a", "END"),
+            ]
         else:
-            STATES[f"Aq{n}_{n+i}"] = [("a", f"Aq{n}_{n+i+1}")]
-    test_string = "a" * n
-    print(f"n={n}:", test_string, match_regex(f"Aq{n}_0", test_string), "checks:", nchecks)
+            states[f"{base}_{i+n}"] = [
+                ("a", f"{base}_{i+n+1}"),
+            ]
+    return states
+
+for i in range(1, 41):
+    STATES = STATES | create_states(i)
+
+for i in range(1, 41):
+    start_state = f"A{i}_0"
+    for n in range(i, 2*i + 1):
+        if not match(start_state, "a" * n):
+            raise ValueError(f"Failed to match {i}, {n}")
 `;
 
 	const CODE_SNIPPETS = {
@@ -332,11 +311,11 @@ for n in range(1, 20):
 			filename: 'simple.py',
 			code: simple_py
 		},
-		dfa_py: {
-			anchor: 'dfa-py',
+		fa_py: {
+			anchor: 'fa-py',
 			language: python,
-			filename: 'dfa.py',
-			code: dfa_py
+			filename: 'fa.py',
+			code: fa_py
 		},
 		nfa_backtrack_py: {
 			anchor: 'nfa-backtrack-py',
@@ -344,11 +323,11 @@ for n in range(1, 20):
 			filename: 'nfa_backtrack.py',
 			code: nfa_backtrack_py
 		},
-		nfa_thompson_py: {
-			anchor: 'nfa-thompson-py',
+		nfa_linear_py: {
+			anchor: 'nfa-linear-py',
 			language: python,
-			filename: 'nfa_thompson.py',
-			code: nfa_thompson_py
+			filename: 'nfa_linear.py',
+			code: nfa_linear_py
 		}
 	};
 </script>
@@ -366,10 +345,10 @@ for n in range(1, 20):
 {/snippet}
 <ul>
 	{@render list_item(CODE_SNIPPETS.simple_py)}
-	{@render list_item(CODE_SNIPPETS.dfa_py)}
+	{@render list_item(CODE_SNIPPETS.fa_py)}
 	{@render list_item(CODE_SNIPPETS.nfa_backtrack_py)}
 	{@render list_item(CODE_SNIPPETS.cpython_patch)}
-	{@render list_item(CODE_SNIPPETS.nfa_thompson_py)}
+	{@render list_item(CODE_SNIPPETS.nfa_linear_py)}
 </ul>
 
 <br />
@@ -425,20 +404,18 @@ for n in range(1, 20):
 	description={simple_desc}
 />
 
-{#snippet dfa_desc()}
+{#snippet fa_desc()}
 	<p>
-		This is a simplistic implementation of a deterministic finite automaton (DFA), i.e., one where
-		the there is no ambiguity as to which state to transition to next. (In fact, deterministic
-		finite automata can have multiple onwards transitions for a single state: it just means that it
-		should not be possible for more than one of them to be applicable.)
+		This is a simplistic implementation of a finite automaton with states and transitions. In later
+		sections we'll expand on this.
 	</p>
 {/snippet}
 <CodeExample
-	anchorname={CODE_SNIPPETS.dfa_py.anchor}
-	language={CODE_SNIPPETS.dfa_py.language}
-	filename={CODE_SNIPPETS.dfa_py.filename}
-	code={CODE_SNIPPETS.dfa_py.code}
-	description={dfa_desc}
+	anchorname={CODE_SNIPPETS.fa_py.anchor}
+	language={CODE_SNIPPETS.fa_py.language}
+	filename={CODE_SNIPPETS.fa_py.filename}
+	code={CODE_SNIPPETS.fa_py.code}
+	description={fa_desc}
 />
 
 {#snippet nfa_backtrack_desc()}
@@ -485,7 +462,7 @@ for n in range(1, 20):
 	description={cpython_patch_desc}
 />
 
-{#snippet nfa_thompson_desc()}
+{#snippet nfa_linear_desc()}
 	<p>
 		This is an implementation of an NFA that doesn't backtrack. Instead of trying each branch in
 		turn, we maintain a <i>set</i> of possible states. Success is reached when the set of possible
@@ -494,11 +471,11 @@ for n in range(1, 20):
 	</p>
 {/snippet}
 <CodeExample
-	anchorname={CODE_SNIPPETS.nfa_thompson_py.anchor}
-	language={CODE_SNIPPETS.nfa_thompson_py.language}
-	filename={CODE_SNIPPETS.nfa_thompson_py.filename}
-	code={CODE_SNIPPETS.nfa_thompson_py.code}
-	description={nfa_thompson_desc}
+	anchorname={CODE_SNIPPETS.nfa_linear_py.anchor}
+	language={CODE_SNIPPETS.nfa_linear_py.language}
+	filename={CODE_SNIPPETS.nfa_linear_py.filename}
+	code={CODE_SNIPPETS.nfa_linear_py.code}
+	description={nfa_linear_desc}
 />
 
 <style>
