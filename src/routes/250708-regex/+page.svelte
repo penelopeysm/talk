@@ -25,7 +25,7 @@ index 1b1aaa7714b..b0d5578eae1 100644
      REPEATING_CODES = _REPEATING_CODES
 `;
 
-	const simple_py = String.raw`
+	const naive_py = String.raw`
 """
 Verify if a string matches the regular expression 'abc'.
 """
@@ -305,11 +305,11 @@ for i in range(1, 41):
 			filename: 'cpython_regex.patch',
 			code: cpython_patch
 		},
-		simple_py: {
-			anchor: 'simple-py',
+		naive_py: {
+			anchor: 'naive-py',
 			language: python,
-			filename: 'simple.py',
-			code: simple_py
+			filename: 'naive.py',
+			code: naive_py
 		},
 		fa_py: {
 			anchor: 'fa-py',
@@ -344,7 +344,7 @@ for i in range(1, 41):
 	<li><a href="#{code.anchor}">{code.filename}</a></li>
 {/snippet}
 <ul>
-	{@render list_item(CODE_SNIPPETS.simple_py)}
+	{@render list_item(CODE_SNIPPETS.naive_py)}
 	{@render list_item(CODE_SNIPPETS.fa_py)}
 	{@render list_item(CODE_SNIPPETS.nfa_backtrack_py)}
 	{@render list_item(CODE_SNIPPETS.cpython_patch)}
@@ -389,19 +389,19 @@ for i in range(1, 41):
 
 <h1>Code snippets</h1>
 
-{#snippet simple_desc()}
+{#snippet naive_desc()}
 	<p>
-		This is a very simple regex engine. It's way too hard-coded, and changing this to support
+		This is a very naive regex engine. It's way too hard-coded, and changing this to support
 		different regular expressions is next-to-impossible, so we will look at ways of generalising
 		this.
 	</p>
 {/snippet}
 <CodeExample
-	anchorname={CODE_SNIPPETS.simple_py.anchor}
-	language={CODE_SNIPPETS.simple_py.language}
-	filename={CODE_SNIPPETS.simple_py.filename}
-	code={CODE_SNIPPETS.simple_py.code}
-	description={simple_desc}
+	anchorname={CODE_SNIPPETS.naive_py.anchor}
+	language={CODE_SNIPPETS.naive_py.language}
+	filename={CODE_SNIPPETS.naive_py.filename}
+	code={CODE_SNIPPETS.naive_py.code}
+	description={naive_desc}
 />
 
 {#snippet fa_desc()}
@@ -465,9 +465,9 @@ for i in range(1, 41):
 {#snippet nfa_linear_desc()}
 	<p>
 		This is an implementation of an NFA that doesn't backtrack. Instead of trying each branch in
-		turn, we maintain a <i>set</i> of possible states. Success is reached when the set of possible
-		states contains the <code>SUCCESS</code> state; failure is reached when the set of possible states
-		is empty.
+		turn, we maintain a <i>set</i> of possible states, and progress through the NFA one character at
+		a time. When we have exhausted the input, we check if any of the states are the <code>END</code>
+		state. If so, then we have a match; if not, then we don't.
 	</p>
 {/snippet}
 <CodeExample
