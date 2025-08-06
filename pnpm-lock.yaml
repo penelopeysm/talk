@@ -54,6 +54,9 @@ importers:
       svelte-check:
         specifier: ^4.2.2
         version: 4.2.2(picomatch@4.0.2)(svelte@5.34.9)(typescript@5.8.3)
+      svelte-copy:
+        specifier: ^2.0.0
+        version: 2.0.0(svelte@5.34.9)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -1041,6 +1044,11 @@ packages:
     peerDependencies:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
+
+  svelte-copy@2.0.0:
+    resolution: {integrity: sha512-wJ784qrc9CF7EtrlT2kwJfHnqae/pp4fkgzYeUxex4iFBm6HosT2904t5cZZ1GAZzg/z9V+lCZVP5rpiYsN6Tw==}
+    peerDependencies:
+      svelte: ^5.0.0
 
   svelte-eslint-parser@1.2.0:
     resolution: {integrity: sha512-mbPtajIeuiyU80BEyGvwAktBeTX7KCr5/0l+uRGLq1dafwRNrjfM5kHGJScEBlPG3ipu6dJqfW/k0/fujvIEVw==}
@@ -2053,6 +2061,10 @@ snapshots:
       typescript: 5.8.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte-copy@2.0.0(svelte@5.34.9):
+    dependencies:
+      svelte: 5.34.9
 
   svelte-eslint-parser@1.2.0(svelte@5.34.9):
     dependencies:
