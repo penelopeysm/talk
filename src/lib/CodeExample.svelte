@@ -2,7 +2,7 @@
 	import Highlight from 'svelte-highlight';
 	import type { LanguageType } from 'svelte-highlight/languages';
 	interface CodeExampleProps {
-		anchorname: string;
+		anchorname: string | null;
 		language: LanguageType<string>;
 		filename: string;
 		code: string;
@@ -21,8 +21,10 @@
 	}
 </script>
 
-<h2 id={anchorname}>{filename}</h2>
-<a href="#toc">(Back to top)</a>
+{#if anchorname !== null}
+	<h2 id={anchorname}>{filename}</h2>
+	<a href="#toc">(Back to top)</a>
+{/if}
 
 {@render description()}
 

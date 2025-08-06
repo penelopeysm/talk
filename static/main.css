@@ -17,9 +17,10 @@ h2 {
 
 pre {
     margin: 20px 50px;
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 code {
-    margin: 0 5px;
+    margin: 0 2px;
+    font-size: 0.9em;
 }
