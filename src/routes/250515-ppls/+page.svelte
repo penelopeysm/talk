@@ -287,6 +287,19 @@ sample(f(), NUTS(), 1000)
 	and how they arise from the design of the library and other technical aspects of Julia.
 </p>
 
+<h2 id="repro">Reproducibility</h2>
+
+The Julia examples in this page were last tested with
+
+<pre><code>
+  [47edcb42] ADTypes v1.16.0
+  [366bfd00] DynamicPPL v0.36.15
+  [7da242da] Enzyme v0.13.66
+  [6fdf6af0] LogDensityProblems v2.1.2
+⌃ [234d2aa0] MicroCanonicalHMC v0.1.6
+  [fce5fe82] Turing v0.39.10
+</code></pre>
+
 <h2 id="toc">Table of contents</h2>
 
 <ul class="toplevel">
