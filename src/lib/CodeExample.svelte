@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Highlight from 'svelte-highlight';
 	import type { LanguageType } from 'svelte-highlight/languages';
 	interface CodeExampleProps {
@@ -6,10 +7,10 @@
 		language: LanguageType<string>;
 		filename: string;
 		code: string;
-		description: any;
+		children?: Snippet;
 	}
 	import { copy } from 'svelte-copy';
-	const { anchorname, language, filename, code, description }: CodeExampleProps = $props();
+	const { anchorname, language, filename, code, children }: CodeExampleProps = $props();
 
 	const trimmedCode = code.trim();
 	let buttonText = $state('Copy');
@@ -26,7 +27,9 @@
 	<a href="#toc">(Back to top)</a>
 {/if}
 
-{@render description()}
+{#if children}
+	{@render children()}
+{/if}
 
 <div class="code-example">
 	<Highlight {language} code={trimmedCode} />

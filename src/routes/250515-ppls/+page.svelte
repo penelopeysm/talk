@@ -1,260 +1,30 @@
 <script lang="ts">
-	import Highlight from 'svelte-highlight';
-	import stan from 'svelte-highlight/languages/stan';
-	import python from 'svelte-highlight/languages/python';
-	import julia from 'svelte-highlight/languages/julia';
+	// Components
+	import InfoBox from '$lib/InfoBox.svelte';
+
+	// Code snippets
+	import ESCjl from './ESCjl.svelte';
+	import ESCstan from './ESCstan.svelte';
+	import ESCstanpy from './ESCstanpy.svelte';
+	import ESCpymc from './ESCpymc.svelte';
+	import BadModel from './BadModel.svelte';
+	import Sampler from './Sampler.svelte';
+	import SubmodelNaive from './SubmodelNaive.svelte';
+	import Submodel from './Submodel.svelte';
+	import AD from './AD.svelte';
+	import ManualAD from './ManualAD.svelte';
+
 	import atomOneLight from 'svelte-highlight/styles/atom-one-light';
 	import { base } from '$app/paths';
-
-	import CodeExample from '$lib/CodeExample.svelte';
-
-	const eight_schools_centered_stan = `
-data {
-  int<lower=0> J; // number of schools
-  array[J] real y; // estimated treatment
-  array[J] real<lower=0> sigma; // std of estimated effect
-}
-parameters {
-  array[J] real theta; // treatment effect in school j
-  real mu; // hyper-parameter of mean
-  real<lower=0> tau; // hyper-parameter of sdv
-}
-model {
-  tau ~ cauchy(0, 5); // a non-informative prior
-  theta ~ normal(mu, tau);
-  y ~ normal(theta, sigma);
-  mu ~ normal(0, 5);
-}`;
-
-	const eight_schools_centered_stan_py = `
-from cmdstanpy import CmdStanModel, install_cmdstan
-from pathlib import Path
-import time
-
-install_cmdstan()
-
-DATA = {
-    "y": [28, 8, -3, 7, -1, 1, 18, 12],
-    "sigma": [15, 10, 16, 11, 9, 11, 10, 18],
-    "J": 8,
-}
-
-def main():
-    stan_file = Path(__file__).parent / "eight_schools_centered.stan"
-    model = CmdStanModel(stan_file=stan_file)
-    x = time.time()
-    fit = model.sample(data=DATA, chains=1,
-                       iter_warmup=10000, save_warmup=False,
-                       iter_sampling=10000, thin=10)
-    y = time.time()
-    print(fit.summary())
-    print(f"Time taken: {y - x} seconds")
-
-
-if __name__ == "__main__":
-    main()
-`;
-
-	const eight_schools_centered_pymc = `
-import pymc as pm
-import numpy as np
-import time
-
-J = 8
-y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
-sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
-
-def main():
-    with pm.Model() as eight_schools_centered:
-        mu = pm.Normal("mu", 0, 5)
-        tau = pm.HalfCauchy("tau", 5)
-        theta = pm.Normal("theta", mu, tau, shape=J)
-        obs = pm.Normal("obs", theta, sigma, observed=y)
-
-        start = time.time()
-        trace = pm.sample(draws=10000, tune=10000, chains=1)
-        end = time.time()
-
-    print(f"took {end - start} seconds")
-
-if __name__ == "__main__":
-    main()`;
-
-	const eight_schools_centered_julia = `
-using Turing
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function eight_schools_centered(J, y, sigma)
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    theta = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta[i] ~ Normal(mu, tau)
-        y[i] ~ Normal(theta[i], sigma[i])
-    end
-end
-
-model_esc = eight_schools_centered(J, y, sigma)
-
-chain = sample(model_esc, NUTS(), 1000; num_warmup=10000, thinning=10)
-    `;
-
-	const sampler_jl = `
-using Turing, MicroCanonicalHMC
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function eight_schools_centered(J, y, sigma)
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    theta = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta[i] ~ Normal(mu, tau)
-        y[i] ~ Normal(theta[i], sigma[i])
-    end
-end
-
-model_esc = eight_schools_centered(J, y, sigma)
-sample(model_esc, NUTS(), 5000)
-
-using MicroCanonicalHMC
-mchmc_sampler = externalsampler(MCHMC(2000, 0.001))
-sample(model_esc, mchmc_sampler, 5000)
-    `;
-
-	const badmodel = `
-using Turing
-
-@model function f(x)
-    y = x + 1
-    y ~ Normal()
-end
-
-sample(f(1.0), NUTS(), 1000)
-`;
-
-	const submodel_naive_jl = `
-using Turing
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function eight_schools_noncentered(J, y, sigma)
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    # We have to change the name of this vector
-    theta_trans = Vector{Float64}(undef, J)
-    for i in 1:J
-        # This was our original model:
-        # theta[i] ~ Normal(mu, tau)
-        # We changed it to:
-        theta_trans[i] ~ Normal(0, 1)
-        theta_i = theta_trans[i] * tau + mu
-        # This likelihood term remains the same.
-        y[i] ~ Normal(theta_i, sigma[i])
-    end
-end
-
-model_esnc = eight_schools_noncentered(J, y, sigma)
-
-chain = sample(model_esnc, NUTS(), 1000; num_warmup=10000, thinning=10)
-ess(chain)
-`;
-
-	const submodel_jl = `
-using Turing
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function priors()
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    return (mu=mu, tau=tau)
-end
-
-@model function eight_schools_centered(J, y, sigma)
-    p ~ to_submodel(priors())
-    theta = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta[i] ~ Normal(p.mu, p.tau)
-        y[i] ~ Normal(theta[i], sigma[i])
-    end
-end
-
-@model function eight_schools_noncentered(J, y, sigma)
-    p ~ to_submodel(priors())
-    theta_trans = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta_trans[i] ~ Normal(0, 1)
-        theta = theta_trans[i] * p.tau + p.mu
-        y[i] ~ Normal(theta, sigma[i])
-    end
-end
-    `;
-
-	const ad_jl = `
-using Turing, ADTypes
-import Enzyme: set_runtime_activity, Reverse
-
-J = 8
-y = [28, 8, -3, 7, -1, 1, 18, 12]
-sigma = [15, 10, 16, 11, 9, 11, 10, 18]
-
-@model function eight_schools_noncentered(J, y, sigma)
-    mu ~ Normal(0, 5)
-    tau ~ truncated(Cauchy(0, 5); lower=0)
-    theta_trans = Vector{Float64}(undef, J)
-    for i in 1:J
-        theta_trans[i] ~ Normal(0, 1)
-        theta = theta_trans[i] * tau + mu
-        y[i] ~ Normal(theta, sigma[i])
-    end
-end
-
-model = eight_schools_noncentered(J, y, sigma)
-
-# ForwardDiff.jl is the default AD backend in Turing.jl.
-# If you don't specify an AD backend, it will do the same as this.
-forwarddiff = AutoForwardDiff()
-chain = sample(model, NUTS(; adtype=forwarddiff), 2000)
-
-# You can switch AD backends by passing a different adtype argument.
-enzyme_reverse = AutoEnzyme(; mode=set_runtime_activity(Reverse, true))
-chain = sample(model, NUTS(; adtype=enzyme_reverse), 2000)
-    `;
-
-	const manualAD = `
-using Turing
-import DynamicPPL, LogDensityProblems
-
-@model f() = x ~ Normal()
-
-function LogDensityProblems.logdensity_and_gradient(
-    ldf::DynamicPPL.LogDensityFunction{<:DynamicPPL.Model{typeof(f)}},
-    x::AbstractVector
-)
-    # This function must return the log probability density as the first
-    # argument and the gradient as the second argument.
-    # You could manually calculate the first argument too, but here we 
-    # just defer to the existing logdensity function.
-    return LogDensityProblems.logdensity(ldf, x), [-x[1]]
-end
-
-sample(f(), NUTS(), 1000)
-`;
 </script>
 
 <svelte:head>
 	{@html atomOneLight}
 </svelte:head>
+
+{#snippet backToTop()}
+	<a href="#toc">Back to top</a>
+{/snippet}
 
 <p><a href={base}>Back to list of talks</a></p>
 
@@ -326,7 +96,7 @@ The Julia examples in this page were last tested with
 </ul>
 
 <h2 id="esc">'Eight schools' in various PPLs</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	The 'eight schools' problem (<a href="https://www.jstor.org/stable/1164617" target="_blank"
@@ -376,8 +146,7 @@ The Julia examples in this page were last tested with
 
 <p>Putting all of this together, we get a Turing.jl model:</p>
 
-<div class="info">
-	<h3>To run this...</h3>
+<InfoBox title="To run this...">
 	<p>
 		Launch Julia with <code>julia --project=.</code> and then in the Julia REPL, enter
 		<code>]</code>. This will cause the REPL to enter package-manager mode, indicated by a prompt of
@@ -388,15 +157,8 @@ The Julia examples in this page were last tested with
 			>julia&gt;</code
 		>. You can then run the commands in this file.
 	</p>
-</div>
-{#snippet empty()}{/snippet}
-<CodeExample
-	anchorname={null}
-	language={julia}
-	filename="eight_schools_centered.jl"
-	code={eight_schools_centered_julia}
-	description={empty}
-/>
+</InfoBox>
+<ESCjl />
 
 <p>
 	The exact same model can be written in Stan as follows (with credit to <a
@@ -404,23 +166,14 @@ The Julia examples in this page were last tested with
 		>PosteriorDB</a
 	>):
 </p>
-
-{#snippet stan_desc()}{/snippet}
-<CodeExample
-	anchorname={null}
-	language={stan}
-	filename="eight_schools_centered.stan"
-	code={eight_schools_centered_stan}
-	description={stan_desc}
-/>
+<ESCstan />
 
 <p>
 	To sample from this model, you'll have to go via Python, R, or Julia. Here is a Python script that
 	executes the model above.
 </p>
 
-<div class="info">
-	<h3>To run this...</h3>
+<InfoBox title="To run this...">
 	<p>
 		You will need to have the Stan model and this Python script saved in the same directory. The
 		Stan model should be named <code>eight_schools_centered.stan</code>.
@@ -430,31 +183,17 @@ The Julia examples in this page were last tested with
 		virtual environment, you can run the script with
 		<code>python eight_schools_centered_stan.py</code>.
 	</p>
-</div>
-<CodeExample
-	anchorname={null}
-	language={python}
-	filename="eight_schools_centered_stan.py"
-	code={eight_schools_centered_stan_py}
-	description={empty}
-/>
+</InfoBox>
+<ESCstanpy />
 
 Finally, we'll look at the same model in PyMC.
 
-<div class="info">
-	<h3>To run this...</h3>
+<InfoBox title="To run this...">
 	<p>You will need a virtual environment with the <code>pymc</code> package installed.</p>
-</div>
-<CodeExample
-	anchorname={null}
-	language={python}
-	filename="eight_schools_centered_pymc.py"
-	code={eight_schools_centered_pymc}
-	description={empty}
-/>
+</InfoBox>
+<ESCpymc />
 
-<div class="info">
-	<h3>Julia's other PPLs</h3>
+<InfoBox title="Julia's other PPLs">
 	<p>
 		Julia also has other PPLs apart from Turing.jl, such as <a
 			href="https://github.com/probcomp/Gen.jl"
@@ -482,10 +221,10 @@ Finally, we'll look at the same model in PyMC.
 		can contain arbitrary Julia code. In return RxInfer can make use of this richer structure to
 		perform inference more efficiently, for example when there are conjugate variables.
 	</p>
-</div>
+</InfoBox>
 
 <h3 id="syntax">Comparing PPL syntaxes</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Between the three PPLs, Turing.jl arguably has the 'nicest' syntax: writing a Turing.jl model is
@@ -513,14 +252,7 @@ Finally, we'll look at the same model in PyMC.
 		target="_blank">GitHub issue</a
 	>) does not have well-defined behaviour:
 </p>
-
-<CodeExample
-	anchorname={null}
-	language={julia}
-	filename="badmodel.py"
-	code={badmodel}
-	description={empty}
-/>
+<BadModel />
 
 <p>
 	It appears here that <code>x</code> is a data variable, since it is a model argument. Thus,
@@ -530,7 +262,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h3 id="speed">Comparing PPL speeds</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Speed is one of the topics which I would prefer to not go into. It always garners a lot of
@@ -565,7 +297,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h2 id="thesis">The central thesis of this talk</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	The main difference that I want to highlight, though, is that Turing.jl has <b
@@ -616,7 +348,7 @@ Finally, we'll look at the same model in PyMC.
 </ul>
 
 <h2 id="turing">(Some) unique Turing.jl features</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	The bulk of this section focuses on some things that Turing.jl can do precisely because the DSL is
@@ -624,7 +356,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h3 id="sampler">External samplers</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Much like adding a custom distribution, to add a custom sampler, you only need to implement an
@@ -634,15 +366,15 @@ Finally, we'll look at the same model in PyMC.
 	generate the first sample, and how to generate the <i>N</i>-th sample given the previous one.
 </p>
 
-<div class="warning">
-	<b>Caveat:</b> this is actually not fully true, as of Turing v0.39. Although the main requirement
-	is to fulfil the AbstractMCMC interface, there are some additional interface details that only
-	come from Turing.jl, most notably <code>Turing.Inference.getparams</code>: see
+<InfoBox title="Caveat" isWarning={true}>
+	This is actually not fully true, as of Turing v0.39. Although the main requirement is to fulfil
+	the AbstractMCMC interface, there are some additional interface details that only come from
+	Turing.jl, most notably <code>Turing.Inference.getparams</code>: see
 	<a
 		href="https://turinglang.org/Turing.jl/stable/api/Inference/#Turing.Inference.ExternalSampler"
 		target="_blank">the Turing.jl documentation</a
 	> for more information. These are likely to be removed in the near future.
-</div>
+</InfoBox>
 
 <p>
 	The relative ease of defining samplers makes Turing.jl a rich ground for implementing new
@@ -654,8 +386,7 @@ Finally, we'll look at the same model in PyMC.
 	<code>externalsampler()</code>:
 </p>
 
-<div class="info">
-	<h3>To run this...</h3>
+<InfoBox title="To run this...">
 	<p>
 		Go back to the same directory that you ran the Julia code in. If you run <code
 			>julia --project=.</code
@@ -666,14 +397,8 @@ Finally, we'll look at the same model in PyMC.
 		<code>add MicroCanonicalHMC</code>, then press Backspace. You can then run all of the code below
 		in the REPL.
 	</p>
-</div>
-<CodeExample
-	anchorname={null}
-	language={julia}
-	filename="sampler.jl"
-	code={sampler_jl}
-	description={empty}
-/>
+</InfoBox>
+<Sampler />
 
 <p>
 	<a href="https://arxiv.org/pdf/2307.14339" target="_blank">Here is an example</a> of the MCHMC sampler
@@ -681,7 +406,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h3 id="submodel">Submodels</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Because Turing.jl models are essentially pure Julia code (with the exception of <code>~</code> statements),
@@ -703,14 +428,7 @@ Finally, we'll look at the same model in PyMC.
 	especially for<code>tau</code> (you can see this from the effective sample size, which is
 	calculated by <code>ess()</code>).
 </p>
-
-<CodeExample
-	anchorname={null}
-	language={julia}
-	filename="submodel_naive.jl"
-	code={submodel_naive_jl}
-	description={empty}
-/>
+<SubmodelNaive />
 
 <p>
 	However, writing out both this parameterisation and the centred one results in some repetition.
@@ -720,19 +438,13 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <p>
-	To avoid this, Turing.jl provides a <code>to_submodel</code> function that allows you to define a submodel
-	that can be used in multiple models. This is very similar to how one would use a function in ordinary
-	Julia code: you would extract out common sections into a single function. This code example demonstrates
-	how:
+	To avoid this, Turing.jl provides a <code>to_submodel</code> function that allows you to define a
+	submodel that can be used in multiple models. This is very similar to how one would use a function
+	in ordinary Julia code: you would extract out common sections into a single function. This code
+	example demonstrates how, and you can also check out
+	<a href="https://turinglang.org/docs/usage/submodels/" target="_blank">the documentation page</a>:
 </p>
-
-<CodeExample
-	anchorname={null}
-	language={julia}
-	filename="submodel.jl"
-	code={submodel_jl}
-	description={empty}
-/>
+<Submodel />
 
 <p>
 	Notice how the priors are now defined only in the <code>priors()</code> model. In order for later
@@ -740,12 +452,14 @@ Finally, we'll look at the same model in PyMC.
 	that submodel. Then, when we call <code>p ~ to_submodel(priors())</code>, we can access that
 	return value as <code>p</code>.
 </p>
-<div class="warning">
-	<b>Caveat:</b> The submodel interface may change in the future. In particular, we would like you
-	to not have to explicitly return the parameters.
-	<a href="https://github.com/TuringLang/Turing.jl/issues/2485" target="_blank">See this issue</a> for
-	more information.
-</div>
+<InfoBox title="Caveat" isWarning={true}>
+	<p>
+		The submodel interface may change in the future. In particular, we would like you to not have to
+		explicitly return the parameters.
+		<a href="https://github.com/TuringLang/Turing.jl/issues/2485" target="_blank">See this issue</a>
+		for more information.
+	</p>
+</InfoBox>
 
 <p>
 	Nested submodels also work as expected: this allows you to build up complex models from simple
@@ -762,7 +476,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h3 id="ad">Automatic differentiation</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Gradient-based samplers, such as Hamiltonian Monte Carlo and its variants (like NUTS), require you
@@ -789,17 +503,21 @@ Finally, we'll look at the same model in PyMC.
 	an <code>adtype</code> argument to the sampler:
 </p>
 
-<div class="warning">
-	<b>Warning:</b> Enzyme compatibility with Turing to date has not always been guaranteed. As of the
-	time of writing, Turing v0.39 (and DynamicPPL v0.36) do largely work with Enzyme! The most
-	up-to-date status can be seen on
-	<a href="https://turinglang.org/ADTests/" target="_blank">the ADTests page</a>.
-</div>
+<InfoBox title="Enzyme compatibility" isWarning={true}>
+	<p>
+		Perfect compatibility between Enzyme and Turing has not always been guaranteed to date. As of
+		the time of writing, Turing v0.39 (and DynamicPPL v0.36) do largely work with Enzyme! The most
+		up-to-date status can be seen on
+		<a href="https://turinglang.org/ADTests/" target="_blank">the ADTests page</a>.
+	</p>
+	<p>
+		If you run into any issues using Turing with Enzyme, please do feel free to post an issue. We
+		can't guarantee that it will be fixed but we'll do our best (within reason).
+	</p>
+</InfoBox>
+<AD />
 
-<CodeExample anchorname={null} language={julia} filename="ad.jl" code={ad_jl} description={empty} />
-
-<div class="info">
-	<h3>What about Mooncake?</h3>
+<InfoBox title="What about Mooncake?">
 	<p>
 		Mooncake is a wonderful AD package! It works very nicely with most Turing models, and the code
 		quality is second to none.
@@ -811,7 +529,7 @@ Finally, we'll look at the same model in PyMC.
 		point about the composability of the Julia ecosystem. I think using Enzyme as an example makes
 		for an even stronger case.
 	</p>
-</div>
+</InfoBox>
 
 <p>
 	The benefit of this is customisability and control. Different AD backends have different coverage
@@ -831,8 +549,7 @@ Finally, we'll look at the same model in PyMC.
 	so that you can tailor the choice to your specific model.
 </p>
 
-<div class="info">
-	<h3>Manual derivatives</h3>
+<InfoBox title="Manual derivatives">
 	<p>
 		If you have analytic derivatives, you can specify this in a rather hacky way by overloading the
 		<code>LogDensityProblems.logdensity_and_gradient</code> method. (Right now it is not possible to
@@ -844,19 +561,13 @@ Finally, we'll look at the same model in PyMC.
 		density is <code>(const - x^2/2)</code>, and the gradient with respect to this parameter is
 		<code>-x</code>. Because we take vectors as inputs and outputs, we need to index and wrap it
 		back in a vector in the following implementation.
-
-		<CodeExample
-			anchorname={null}
-			language={julia}
-			filename="manual_ad.jl"
-			code={manualAD}
-			description={empty}
-		/>
 	</p>
-</div>
+
+	<ManualAD />
+</InfoBox>
 
 <h3 id="andtherest">All the other stuff</h3>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	There are a ton of other integrations here which I don't have time to go into, like differential
@@ -866,7 +577,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h2 id="responsibility">What's difficult about this?</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	So far I've presented a number of things that Turing.jl can do, by virtue of being a single
@@ -929,7 +640,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h2 id="choosing">Choosing a PPL</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	With all of this said, we should probably return to the question of which PPL is 'the best'. This
@@ -968,7 +679,7 @@ Finally, we'll look at the same model in PyMC.
 </p>
 
 <h2 id="support">How you can support your favourite PPL</h2>
-<a href="#toc">(Back to top)</a>
+{@render backToTop()}
 
 <p>
 	Regardless of which PPL you choose to use, I would love to encourage you to support it (and
@@ -1014,37 +725,10 @@ Finally, we'll look at the same model in PyMC.
 	ul.toplevel > * {
 		margin-bottom: 0.7em;
 	}
-
 	h2 {
 		margin-top: 40px;
 	}
 	h3 {
 		margin-bottom: 0;
-	}
-	div.info {
-		margin: 20px;
-		border-radius: 10px;
-		padding: 10px 20px;
-		background-color: #e0f7fa;
-		font-size: 0.9em;
-
-		h3 {
-			margin: 0;
-		}
-
-		:last-child {
-			margin-bottom: 0;
-		}
-	}
-
-	div.warning {
-		margin: 0 20px 20px 20px;
-		border-radius: 10px;
-		padding: 10px 20px;
-		font-size: 0.9em;
-		background-color: #f9d4e2;
-		:last-child {
-			margin-bottom: 0;
-		}
 	}
 </style>
