@@ -38,4 +38,3 @@ ess(chain)
 	filename="submodel_naive.jl"
 	code={submodel_naive_jl}
 />
-

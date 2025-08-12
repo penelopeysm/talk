@@ -20,7 +20,7 @@
 	<a href="#toc">Back to top</a>
 {/snippet}
 
-<p><a href={base}>Back to list of talks</a></p>
+<p><a href="{base}/">Back to list of talks</a></p>
 
 <h1>Why Turing.jl? A limited comparison of probabilistic programming frameworks</h1>
 
