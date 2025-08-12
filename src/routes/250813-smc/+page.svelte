@@ -4,13 +4,14 @@
 
 	import { base } from '$app/paths';
 	import sir_jl from './sir.jl?raw';
-    import pf_jl from './particle_filter.jl?raw';
-    import pmmh_jl from './pmmh.jl?raw';
+	import pf_jl from './particle_filter.jl?raw';
+	import pmmh_jl from './pmmh.jl?raw';
 </script>
 
-<p><a href="{base}/">Back to list of talks</a></p>
-
-<!-- <h1 id="toc">Table of contents</h1> -->
+<p id="top"><a href="{base}/">Back to list of talks</a></p>
+{#snippet backToTop()}
+	<a href="#top">Back to top</a>
+{/snippet}
 
 <h1 id="links">Some other resources</h1>
 <ul>
@@ -40,16 +41,16 @@
 <p>Truthfully though I worked most of this out with ChatGPT.</p>
 
 <h2 id="sir">Sampling–importance–resampling</h2>
+{@render backToTop()}
 <CodeExample anchorname={null} language={julia} filename="sir.jl" code={sir_jl} />
 
 <h2 id="pf">The particle filter</h2>
-
+{@render backToTop()}
 <p>This is giving real 'draw the rest of the owl' vibes.</p>
-
 <CodeExample anchorname={null} language={julia} filename="particle_filter.jl" code={pf_jl} />
 
 <h2 id="pmmh">Particle marginal Metropolis–Hastings</h2>
-
+{@render backToTop()}
 <CodeExample anchorname={null} language={julia} filename="pmmh.jl" code={pmmh_jl} />
 
 <style>

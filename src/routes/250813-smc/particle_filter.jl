@@ -26,9 +26,8 @@ end
 
 function sample_new_x!(particles::Vector{Particle}, i::Int)
     # check that we're sampling the next x
-    @assert length(particles[1].xs) == i - 1
-    for (j, p) in enumerate(particles)
-        # println("sampling x[$i] for particle $j")
+    @assert all(p -> length(p.xs) == i - 1, particles)
+    for p in particles
         # 'bootstrap filter' i.e. sample x from its prior distribution
         # then we don't need to include it in the weight
         x_i = if i == 1
@@ -65,7 +64,7 @@ function run_particle_filter(n_particles::Int, ys::Vector{Float64})
         # calculate weights for y_i
         logweights = get_logweights(particles, i, ys)
         # calculate log-evidence
-        log_evidence += log(sum(exp.(logweights)))
+        log_evidence += log(mean(exp.(logweights)))
         # resample based on those weights
         particles = sir_minimal(particles, logweights)
     end
