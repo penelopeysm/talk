@@ -33,7 +33,8 @@ def progress_state(in_states: set[str], input: str):
 
     for state in in_states:
         if state == "END":
-            out_states.add("END")
+            # We reached the end but there was still input!
+            # We need to drop this state
             continue
 
         if state not in STATES:
