@@ -51,6 +51,23 @@ function get_logweights(
     return map(p -> logpdf(Normal(p.xs[i]), ys[i]), particles)
 end
 
+using Plots
+function plot_particle_trajectory(particles::Vector{Particle})
+    n_particles = length(particles)
+    n_parameters = length(particles[1].xs)
+    p = plot()
+    for i in 2:n_parameters
+        pairs = [(p.xs[i-1], p.xs[i]) for p in particles]
+        pairs_and_counts = [(i, count(==(i), pairs)) for i in unique(pairs)]
+        for (pair, count) in pairs_and_counts
+            plot!([i-1, i], [pair[1], pair[2]], linewidth=(8*count/n_particles), label="")
+        end
+    end
+    xlabel!("parameter number")
+    ylabel!("parameter value")
+    display(p)
+end
+
 function run_particle_filter(n_particles::Int, ys::Vector{Float64})
     # initialise particles
     particles = initialise_particles(n_particles)
@@ -71,8 +88,9 @@ function run_particle_filter(n_particles::Int, ys::Vector{Float64})
     return particles, log_evidence
 end
 
-pf, le = run_particle_filter(50, [1.0, 2.0, 3.0, 4.0, 5.0])
+pf, le = run_particle_filter(20, [1.0, 2.0, 3.0, 4.0, 5.0])
 for particle in pf
     display(particle)
 end
 println("Log-evidence: ", le)
+plot_particle_trajectory(pf)
