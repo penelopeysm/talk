@@ -20,7 +20,7 @@
 	</li>
 	<li>
 		<a href="https://www.stats.ox.ac.uk/~doucet/andrieu_doucet_holenstein_PMCMC.pdf" target="_blank"
-			>The infamous pMCMC review by Doucet <i>et al.</i></a
+			>The infamous pMCMC review by Andrieu <i>et al.</i></a
 		> which offers a very thorough (and dense) theoretical justification for why particle MCMC methods
 		work. I've spent a reasonable amount of time attempting to read it, but with very little success.
 	</li>
