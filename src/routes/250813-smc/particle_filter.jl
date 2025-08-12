@@ -80,7 +80,7 @@ function run_particle_filter(n_particles::Int, ys::Vector{Float64})
         sample_new_x!(particles, i)
         # calculate weights for y_i
         logweights = get_logweights(particles, i, ys)
-        # calculate log-evidence
+        # calculate log-evidence ( = p(y_1, y_2, ..., y_i) )
         log_evidence += log(mean(exp.(logweights)))
         # resample based on those weights
         particles = sir_minimal(particles, logweights)

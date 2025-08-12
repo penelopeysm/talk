@@ -56,4 +56,4 @@ using Turing
     end
 end
 chn = sample(ssm(ys), NUTS(), 1000)
-display(chn)
+describe(chn)
