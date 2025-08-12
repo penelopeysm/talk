@@ -2,8 +2,6 @@
 	import { base } from '$app/paths';
 	import CodeExample from '$lib/CodeExample.svelte';
 
-	import atomOneLight from 'svelte-highlight/styles/atom-one-light';
-	import diff from 'svelte-highlight/languages/diff';
 	import python from 'svelte-highlight/languages/python';
 
 	const naive_py = String.raw`
@@ -310,10 +308,6 @@ for i in range(1, 41):
 	};
 </script>
 
-<svelte:head>
-	{@html atomOneLight}
-</svelte:head>
-
 <p><a href="{base}/">Back to list of talks</a></p>
 
 <h1 id="toc">Table of contents - code snippets</h1>
@@ -361,36 +355,37 @@ for i in range(1, 41):
 
 <h1>Code snippets</h1>
 
-{#snippet naive_desc()}
-	<p>
-		This is a very naive regex engine. It's way too hard-coded, and changing this to support
-		different regular expressions is next-to-impossible, so we will look at ways of generalising
-		this.
-	</p>
-{/snippet}
 <CodeExample
 	anchorname={CODE_SNIPPETS.naive_py.anchor}
 	language={CODE_SNIPPETS.naive_py.language}
 	filename={CODE_SNIPPETS.naive_py.filename}
 	code={CODE_SNIPPETS.naive_py.code}
-	description={naive_desc}
-/>
-
-{#snippet fa_desc()}
+>
 	<p>
-		This is a simplistic implementation of a finite automaton with states and transitions. In later
-		sections we'll expand on this.
+		This is a very naive regex engine. It's way too hard-coded, and changing this to support
+		different regular expressions is next-to-impossible, so we will look at ways of generalising
+		this.
 	</p>
-{/snippet}
+</CodeExample>
+
 <CodeExample
 	anchorname={CODE_SNIPPETS.fa_py.anchor}
 	language={CODE_SNIPPETS.fa_py.language}
 	filename={CODE_SNIPPETS.fa_py.filename}
 	code={CODE_SNIPPETS.fa_py.code}
-	description={fa_desc}
-/>
+>
+	<p>
+		This is a simplistic implementation of a finite automaton with states and transitions. In later
+		sections we'll expand on this.
+	</p>
+</CodeExample>
 
-{#snippet nfa_backtrack_desc()}
+<CodeExample
+	anchorname={CODE_SNIPPETS.nfa_backtrack_py.anchor}
+	language={CODE_SNIPPETS.nfa_backtrack_py.language}
+	filename={CODE_SNIPPETS.nfa_backtrack_py.filename}
+	code={CODE_SNIPPETS.nfa_backtrack_py.code}
+>
 	<p>
 		This is a <i>backtracking</i> non-deterministic finite automaton (NFA). When it reaches a branch
 		where multiple possible forward transitions are possible, it tries the first one. If that fails to
@@ -400,36 +395,23 @@ for i in range(1, 41):
 		This is accompanied by an implementation of various different regexes, to show that this engine
 		is indeed general.
 	</p>
-{/snippet}
-<CodeExample
-	anchorname={CODE_SNIPPETS.nfa_backtrack_py.anchor}
-	language={CODE_SNIPPETS.nfa_backtrack_py.language}
-	filename={CODE_SNIPPETS.nfa_backtrack_py.filename}
-	code={CODE_SNIPPETS.nfa_backtrack_py.code}
-	description={nfa_backtrack_desc}
-/>
+</CodeExample>
 
-{#snippet nfa_linear_desc()}
+<CodeExample
+	anchorname={CODE_SNIPPETS.nfa_linear_py.anchor}
+	language={CODE_SNIPPETS.nfa_linear_py.language}
+	filename={CODE_SNIPPETS.nfa_linear_py.filename}
+	code={CODE_SNIPPETS.nfa_linear_py.code}
+>
 	<p>
 		This is an implementation of an NFA that doesn't backtrack. Instead of trying each branch in
 		turn, we maintain a <i>set</i> of possible states, and progress through the NFA one character at
 		a time. When we have exhausted the input, we check if any of the states are the <code>END</code>
 		state. If so, then we have a match; if not, then we don't.
 	</p>
-{/snippet}
-<CodeExample
-	anchorname={CODE_SNIPPETS.nfa_linear_py.anchor}
-	language={CODE_SNIPPETS.nfa_linear_py.language}
-	filename={CODE_SNIPPETS.nfa_linear_py.filename}
-	code={CODE_SNIPPETS.nfa_linear_py.code}
-	description={nfa_linear_desc}
-/>
+</CodeExample>
 
 <style>
-	code {
-		font-size: 0.9em;
-		background-color: #f0f0f0;
-	}
 	ul {
 		display: flex;
 		flex-direction: column;
