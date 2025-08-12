@@ -30,7 +30,8 @@ function sir(
     # normalise the weights
     weights ./= sum(weights)
     # then resample from the weighted samples
-    p_samples = rand(DiscreteNonParametric(q_samples, weights), n_samples)
+    p_samples_idx = rand(Categorical(weights), length(q_samples))
+    p_samples = q_samples[p_samples_idx]
     return p_samples
 end
 
