@@ -22,6 +22,7 @@
 		border-radius: 10px;
 		padding: 10px 20px;
 		font-size: 0.9em;
+		color: var(--text);
 
 		h3 {
 			margin: 0;
@@ -33,10 +34,10 @@
 	}
 
 	div.info {
-		background-color: #e0f7fa;
+		background-color: var(--info-box-background);
 	}
 
 	div.warning {
-		background-color: #f9d4e2;
+		background-color: var(--warning-box-background);
 	}
 </style>

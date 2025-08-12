@@ -1,5 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&family=Fira+Code:wght@300..700&display=swap');
 
+@import "https://unpkg.com/@highlightjs/cdn-assets@11.11.1/styles/atom-one-light.min.css" screen and (prefers-color-scheme: light);
+@import "https://unpkg.com/@highlightjs/cdn-assets@11.11.1/styles/atom-one-dark.min.css" screen and (prefers-color-scheme: dark);
+
 body {
     margin: 30px;
     font-family: "Figtree", sans-serif;
@@ -23,4 +26,27 @@ pre {
 code {
     margin: 0 2px;
     font-size: 0.9em;
+}
+
+@media screen and (prefers-color-scheme: light) {
+    html {
+        --background: #f8f8f8;
+        --text: #151515;
+        --info-box-background: #e0f7fa;
+        --warning-box-background: #f9d4e2;
+        --button-background-hover: #eaeaea;
+        --a-link: #007bff;
+        --a-visited: #9652c4;
+    }
+}
+@media screen and (prefers-color-scheme: dark) {
+    html {
+        --background: #1e1e1e;
+        --text: #d8d8d8;
+        --info-box-background: #137582;
+        --warning-box-background: #7f1f59;
+        --button-background-hover: #505050;
+        --a-link: #b5e3f4;
+        --a-visited: #d8b5f4;
+    }
 }

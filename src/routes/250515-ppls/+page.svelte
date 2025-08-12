@@ -13,14 +13,8 @@
 	import Submodel from './Submodel.svelte';
 	import AD from './AD.svelte';
 	import ManualAD from './ManualAD.svelte';
-
-	import atomOneLight from 'svelte-highlight/styles/atom-one-light';
 	import { base } from '$app/paths';
 </script>
-
-<svelte:head>
-	{@html atomOneLight}
-</svelte:head>
 
 {#snippet backToTop()}
 	<a href="#toc">Back to top</a>

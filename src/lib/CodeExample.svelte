@@ -50,7 +50,9 @@
 	button.copy {
 		font-family: inherit;
 		padding: 4px 8px;
-		border: 1.5px solid black;
+		border: 1.5px solid var(--text);
+		color: var(--text);
+		background-color: var(--background);
 		border-radius: 5px;
 		cursor: pointer;
 		transition: background-color 0.3s ease;
@@ -61,6 +63,6 @@
 		font-size: 0.8em;
 	}
 	button.copy:hover {
-		background-color: #f3f3f3;
+		background-color: var(--button-background-hover);
 	}
 </style>
