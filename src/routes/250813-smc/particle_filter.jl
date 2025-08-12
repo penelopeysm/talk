@@ -52,7 +52,7 @@ function get_logweights(
 end
 
 using Plots
-function plot_particle_trajectory(particles::Vector{Particle})
+function plot_particle_trajectory(particles::Vector{Particle}, n_observations::Int)
     n_particles = length(particles)
     n_parameters = length(particles[1].xs)
     p = plot()
@@ -65,6 +65,9 @@ function plot_particle_trajectory(particles::Vector{Particle})
     end
     xlabel!("parameter number")
     ylabel!("parameter value")
+    # standardise so that we can compare plots visually
+    xlims!(0.9, n_observations + 0.1)
+    ylims!(-6, 6)
     display(p)
 end
 
@@ -84,13 +87,19 @@ function run_particle_filter(n_particles::Int, ys::Vector{Float64})
         log_evidence += log(mean(exp.(logweights)))
         # resample based on those weights
         particles = sir_minimal(particles, logweights)
+        # visualise
+        plot_particle_trajectory(particles, n_obs)
+        # prompt for input before continuing
+        println("Press Enter to continue to the next observation...")
+        readline()
     end
     return particles, log_evidence
 end
 
-pf, le = run_particle_filter(20, [1.0, 2.0, 3.0, 4.0, 5.0])
+ys = [1.0, 2.0, 3.0, 4.0, 5.0]
+pf, le = run_particle_filter(20, ys)
 for particle in pf
     display(particle)
 end
 println("Log-evidence: ", le)
-plot_particle_trajectory(pf)
+plot_particle_trajectory(pf, length(ys))
