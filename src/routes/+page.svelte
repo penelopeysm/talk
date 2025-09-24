@@ -9,7 +9,7 @@
 		{
 			date: '1 October 2025',
 			title: 'Why we\'re NUTS about Turing.jl (and what you can infer from it)',
-			link: '/251001_nuts_turing.pdf',
+			link: '251001_nuts_turing.pdf',
 			occasion: 'Fundamental Research showcase event, The Alan Turing Institute'
 		},
 		{
