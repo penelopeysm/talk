@@ -7,6 +7,12 @@
 	};
 	const TALKS: Talk[] = [
 		{
+			date: '1 October 2025',
+			title: 'Why we\'re NUTS about Turing.jl (and what you can infer from it)',
+			link: '/251001_nuts_turing.pdf',
+			occasion: 'Fundamental Research showcase event, The Alan Turing Institute'
+		},
+		{
 			date: '13 August 2025',
 			title: 'Sequential Monte Carlo from scratch',
 			link: '250813-smc',
