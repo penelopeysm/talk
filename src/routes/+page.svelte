@@ -7,6 +7,12 @@
 	};
 	const TALKS: Talk[] = [
 		{
+			date: '2 October 2025',
+			title: 'Turing.jl poster (with Markus Hauru)',
+			link: 'JuliaCon2025_Turing_Poster.pdf',
+			occasion: 'JuliaCon Local Paris, 2025'
+		},
+		{
 			date: '1 October 2025',
 			title: 'Why we\'re NUTS about Turing.jl (and what you can infer from it)',
 			link: '251001_nuts_turing.pdf',
