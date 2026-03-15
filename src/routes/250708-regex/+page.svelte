@@ -38,6 +38,23 @@
 
 <p><a href="{base}/">Back to list of talks</a></p>
 
+<h1 id="recording">Talk recording</h1>
+
+<p>The actual talk starts at around 4:40.</p>
+
+<div id="_recording">
+	<iframe
+		width="840"
+		height="473"
+		src="https://www.youtube.com/embed/6ASfL9UHjaY?si=MQJXwZhf9X76C3p9&amp;start=60"
+		title="YouTube video player"
+		frameborder="0"
+		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+		referrerpolicy="strict-origin-when-cross-origin"
+		allowfullscreen
+	></iframe>
+</div>
+
 <h1 id="toc">Table of contents - code snippets</h1>
 
 {#snippet list_item(code)}
@@ -144,5 +161,9 @@
 		display: flex;
 		flex-direction: column;
 		gap: 5px;
+	}
+
+	div#_recording {
+		max-width: 800px;
 	}
 </style>
