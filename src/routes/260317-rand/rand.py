@@ -8,56 +8,50 @@ class LCG:
 
     def next(self, x: int):
         return ((self.a * x) + self.c) % self.m
-    
-lcg = LCG(43, 7, 1024)
 
-def draw_int_samples(N, seed=5):
+
+def generate_ints(N: int, seed: int):
+    lcg = LCG(43, 1, 1024)
     x = seed
     samples = []
     for _ in range(N):
-        samples.append(x)
         x = lcg.next(x)
+        samples.append(x)
     return samples
 
-samples = draw_int_samples(500)
+
 expected_mean = (1023 - 0) / 2
-print(expected_mean)
-print(mean(samples))
-
-print("------")
-
-def draw_float_samples(N, seed=5):
-    return [i/1024 for i in draw_int_samples(N, seed=seed)]
-
-samples = draw_float_samples(500)
-expected_mean = 0.5
-print(expected_mean)
-print(mean(samples))
-
-# ------------------------
-
-def bools_to_int(bools: list[bool]):
-    exponent = 0
-    sum = 0
-    for b in reversed(bools):
-        if b:
-            sum += 2**exponent
-        exponent += 1
-    return sum
+# print(expected_mean)
+# print(mean(generate_ints(400, 3)))
 
 T = True
 F = False
 
-bools_to_int([T, T, F])
+def to_bools(n: int):
+    bools = []
+    while n > 0:
+        if (n % 2 == 1):
+            bools.append(T)
+        else:
+            bools.append(F)
+        n = n // 2
+    return list(reversed(bools))
 
-
-import math
+def from_bools(bs: list[bool]):
+    exp = 0
+    sum = 0
+    for b in reversed(bs):
+        if b:
+            sum += 2**exp
+        exp += 1
+    return sum
 
 class Float8:
-    def __init__(self, sign: bool, exponent: list[bool],
+    def __init__(self, sign: bool,
+                 exponent: list[bool],
                  mantissa: list[bool]):
-        assert len(exponent) == 3
-        assert len(mantissa) == 4
+        assert len(exponent) == 4
+        assert len(mantissa) == 3
         self.sign = sign
         self.exponent = exponent
         self.mantissa = mantissa
@@ -65,13 +59,28 @@ class Float8:
     def to_decimal(self):
         if not any(self.exponent):
             return 0.0
-        if all(self.exponent):
-            return math.inf
 
         sign = -1 if self.sign else +1
-        exponent = bools_to_int(self.exponent) - 4
-        mantissa = 1 + (bools_to_int(self.mantissa) / 16)
-        return sign * (mantissa) * 2**exponent
+        exponent = 2 ** (from_bools(self.exponent) - 8)
+        mantissa = 1 + (from_bools(self.mantissa) / 8)
+
+        return sign * exponent * mantissa
+
+    def __repr__(self):
+        s = ""
+        def _short(bool):
+            return 'T' if bool else 'F'
+        s += _short(self.sign)
+        s += " " 
+        s += "".join(map(_short, self.exponent))
+        s += " " 
+        s += "".join(map(_short, self.mantissa))
+        s += " = "
+        s += f"{self.to_decimal()}"
+        return s
+
+from itertools import product
+for mantissa in product([T, F], repeat=3):
+    print(Float8(F, [F, F, F, T], mantissa))
 
 
-print(Float8(F, [F, F, T], [F, F, F, F]).to_decimal())
