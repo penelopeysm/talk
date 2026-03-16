@@ -19,11 +19,6 @@ def generate_ints(N: int, seed: int):
         samples.append(x)
     return samples
 
-
-expected_mean = (1023 - 0) / 2
-# print(expected_mean)
-# print(mean(generate_ints(400, 3)))
-
 T = True
 F = False
 
@@ -80,7 +75,20 @@ class Float8:
         return s
 
 from itertools import product
-for mantissa in product([T, F], repeat=3):
-    print(Float8(F, [F, F, F, T], mantissa))
+for mantissa in product([F, T], repeat=3):
+    print(Float8(F, [T, F, F, F], mantissa).to_decimal())
 
+def generate_floats(N: int, seed: int):
+    lcg = LCG(3, 1, 8)
+    x = seed
+    floats = []
+    for _ in range(N):
+        x = lcg.next(x)
+        mantissa = to_bools(x)
+        mantissa = ([F] * (3 - len(mantissa))) + mantissa
+        floats.append(Float8(F, [T, F, F, F], mantissa))
+    return floats
 
+fs = generate_floats(20, 3)
+for f in fs:
+    print(f.to_decimal())
