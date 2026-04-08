@@ -40,20 +40,16 @@
 
 <h1 id="recording">Talk recording</h1>
 
-<p>The actual talk starts at around 4:40.</p>
-
-<div id="_recording">
-	<iframe
-		width="840"
-		height="473"
-		src="https://www.youtube.com/embed/6ASfL9UHjaY?si=MQJXwZhf9X76C3p9&amp;start=60"
-		title="YouTube video player"
-		frameborder="0"
-		allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-		referrerpolicy="strict-origin-when-cross-origin"
-		allowfullscreen
-	></iframe>
-</div>
+<iframe
+	width="840"
+	height="473"
+	src="https://www.youtube.com/embed/6ASfL9UHjaY?si=eA7OzlPkPuJNLHnb"
+	title="YouTube video player"
+	frameborder="0"
+	allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+	referrerpolicy="strict-origin-when-cross-origin"
+	allowfullscreen
+></iframe>
 
 <h1 id="toc">Table of contents - code snippets</h1>
 
