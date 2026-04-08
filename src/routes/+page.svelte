@@ -13,7 +13,7 @@
 				'What Really Goes On Inside Random Number Generation (and how to use that to win at Pokémon)',
 			link: '260317-rand',
 			occasion: 'REG tech talk',
-			hasRecording: false
+			hasRecording: true
 		},
 		{
 			date: '2 October 2025',
