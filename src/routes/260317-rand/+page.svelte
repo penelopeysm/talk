@@ -14,7 +14,7 @@
 
 <h1 id="recording">Talk recording</h1>
 
-<p>The actual talk starts at around 4:40.</p>
+Looking back I think I tried to cover too much in this talk, so I am speaking very quickly!
 
 <div id="_recording">
 	<iframe
