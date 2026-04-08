@@ -14,7 +14,7 @@
 
 <h1 id="recording">Talk recording</h1>
 
-Looking back I think I tried to cover too much in this talk, so I am speaking very quickly!
+<p>Looking back I think I tried to cover too much in this talk, so I am speaking very quickly!</p>
 
 <div id="_recording">
 	<iframe
