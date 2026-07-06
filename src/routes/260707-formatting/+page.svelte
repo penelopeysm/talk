@@ -82,7 +82,7 @@
 <p>
 	The idea in Haskell is that if you have a <code>Union</code> doc, and you pick the first option,
 	the second option never even needs to be materialised. This matters especially when you have
-	nested <code>Union</code> docs.
+	nested <code>Union</code> docs. See the Lindig paper above.
 </p>
 
 <CodeExample anchorname={null} language={julia} filename="wadler.jl" code={wadler} />
