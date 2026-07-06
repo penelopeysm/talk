@@ -8,6 +8,14 @@
 	};
 	const TALKS: Talk[] = [
 		{
+			date: '7 July 2026',
+			title:
+				'Algorithms for Code Formatting: The Pretty, The Ugly, and The *Ugly*',
+			link: '260707-formatting',
+			occasion: 'REG tech talk',
+			hasRecording: false
+		},
+		{
 			date: '17 March 2026',
 			title:
 				'What Really Goes On Inside Random Number Generation (and how to use that to win at Pokémon)',
