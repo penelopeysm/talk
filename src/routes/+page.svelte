@@ -8,6 +8,14 @@
 	};
 	const TALKS: Talk[] = [
 		{
+			date: '13 August 2026',
+			title:
+				'Two Years with Turing.jl v0',
+			link: '260813-turing-juliacon',
+			occasion: 'JuliaCon Global 2026, Mainz',
+			hasRecording: false
+		},
+		{
 			date: '7 July 2026',
 			title:
 				'Algorithms for Code Formatting: The Pretty, The Ugly, and The *Ugly*',
